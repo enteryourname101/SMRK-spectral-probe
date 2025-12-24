@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "canisters": {
+    "smrk_probe": {
+      "type": "rust",
+      "package": "smrk_probe",
+      "candid": "canisters/smrk_probe/smrk_probe.did",
+      "wasm": "target/wasm32-unknown-unknown/release/smrk_probe.wasm"
+    },
+    "frontend": {
+      "type": "assets",
+      "source": ["frontend"]
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  }
+}
