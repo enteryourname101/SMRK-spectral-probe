@@ -1,0 +1,23 @@
+type SymmetryReport = record {
+  n: nat32;
+  p_max: nat32;
+  alpha: float64;
+  beta: float64;
+  seed: nat64;
+  trials: nat32;
+
+  sym_abs_mean: float64;      // mean |<x,Hy> - <Hx,y>|
+  sym_abs_max: float64;       // max  |<x,Hy> - <Hx,y>|
+  hx_norm_mean: float64;      // mean ||Hx||
+  x_norm_mean: float64;       // mean ||x||
+};
+
+service : {
+  get_version: () -> (text) query;
+
+  // Deterministic matvec: y = H x on indices 1..=N, prime sum truncated to p<=Pmax.
+  matvec: (nat32, nat32, float64, float64, vec float64) -> (vec float64);
+
+  // Symmetry leakage probe using deterministic pseudo-random vectors from seed.
+  symmetry_probe: (nat32, nat32, float64, float64, nat64, nat32) -> (SymmetryReport);
+}
