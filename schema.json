@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "smrk://experiments/spectral_probe/schema/v1",
+  "title": "SMRK Spectral Probe Experiment Output Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "experiment",
+    "artifact",
+    "params",
+    "results",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+
+    "experiment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "const": "spectral_probe"
+        },
+        "name": {
+          "type": "string",
+          "const": "SMRK Spectral Probe"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["created_at_utc", "canonical_json_sha256"],
+      "properties": {
+        "created_at_utc": {
+          "type": "string",
+          "description": "UTC timestamp in ISO-8601 format (e.g., 2025-12-24T12:00:00Z).",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "canonical_json_sha256": {
+          "type": "string",
+          "description": "SHA-256 hash of the canonical JSON representation of the full experiment output (hex).",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "commitment_only": {
+          "type": "boolean",
+          "description": "If true, this record may omit large raw arrays and only serve as a commitment.",
+          "default": false
+        }
+      }
+    },
+
+    "params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["N", "Pmax", "alpha", "beta", "seed", "trials"],
+      "properties": {
+        "N": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Truncation dimension (ℓ²({1..N}))."
+        },
+        "Pmax": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Maximum prime cutoff for prime-indexed terms."
+        },
+        "alpha": {
+          "type": "number",
+          "description": "Weight for the von Mangoldt Λ(n) diagonal term."
+        },
+        "beta": {
+          "type": "number",
+          "description": "Weight for the log(n) diagonal term."
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Deterministic PRNG seed used for generating test vectors."
+        },
+        "trials": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of test vector pairs used in the probe."
+        }
+      }
+    },
+
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sym_abs_mean",
+        "sym_abs_max",
+        "hx_norm_mean",
+        "x_norm_mean"
+      ],
+      "properties": {
+        "sym_abs_mean": {
+          "type": "number",
+          "description": "Mean absolute symmetry defect |<x,Hy> - <Hx,y>| over trials."
+        },
+        "sym_abs_max": {
+          "type": "number",
+          "description": "Maximum absolute symmetry defect observed over trials."
+        },
+        "hx_norm_mean": {
+          "type": "number",
+          "description": "Mean ||H x|| over trials."
+        },
+        "x_norm_mean": {
+          "type": "number",
+          "description": "Mean ||x|| over trials."
+        },
+
+        "notes": {
+          "type": "string",
+          "description": "Optional human notes about the run.",
+          "default": ""
+        }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canister",
+        "build",
+        "environment"
+      ],
+      "properties": {
+        "canister": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["network", "canister_id", "method"],
+          "properties": {
+            "network": {
+              "type": "string",
+              "description": "Network identifier (e.g., local, ic)."
+            },
+            "canister_id": {
+              "type": "string",
+              "description": "ICP canister ID used for the run."
+            },
+            "method": {
+              "type": "string",
+              "description": "Canister method invoked (e.g., symmetry_probe).",
+              "enum": ["symmetry_probe", "matvec"]
+            }
+          }
+        },
+
+        "build": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["wasm_sha256", "git_commit", "version"],
+          "properties": {
+            "wasm_sha256": {
+              "type": "string",
+              "description": "SHA-256 of the deployed WASM module (hex).",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "git_commit": {
+              "type": "string",
+              "description": "Git commit hash of the repo used to build the canister.",
+              "pattern": "^[a-f0-9]{7,40}$"
+            },
+            "version": {
+              "type": "string",
+              "description": "Human readable build version tag (e.g., v0.1.0)."
+            }
+          }
+        },
+
+        "environment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dfx_version", "rust_version"],
+          "properties": {
+            "dfx_version": {
+              "type": "string",
+              "description": "dfx version used for deployment."
+            },
+            "rust_version": {
+              "type": "string",
+              "description": "rustc version used for build."
+            },
+            "host": {
+              "type": "string",
+              "description": "Optional host info (OS/browser) for frontend-driven runs."
+            }
+          }
+        }
+      }
+    },
+
+    "raw": {
+      "type": "object",
+      "description": "Optional raw data. May be omitted for commitment-only records.",
+      "additionalProperties": false,
+      "properties": {
+        "trial_defects": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Per-trial symmetry defect values (optional; can be large)."
+        },
+        "trial_hx_norms": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Per-trial ||H x|| values (optional)."
+        },
+        "trial_x_norms": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Per-trial ||x|| values (optional)."
+        }
+      }
+    }
+  }
+}
