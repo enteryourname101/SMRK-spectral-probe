@@ -1,0 +1,3 @@
+[workspace]
+members = ["canisters/smrk_probe"]
+resolver = "2"
